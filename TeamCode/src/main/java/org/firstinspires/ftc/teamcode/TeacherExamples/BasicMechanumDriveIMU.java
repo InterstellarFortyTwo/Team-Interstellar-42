@@ -26,6 +26,7 @@ public class BasicMechanumDriveIMU extends LinearOpMode {
         BACK_L.setDirection(DcMotorSimple.Direction.FORWARD);
         BACK_R.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        //When using an IMU, you must initialize it. There are many ways to write it. Find a simpler way in Measure_IMU
         IMU imu = hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
@@ -40,6 +41,7 @@ public class BasicMechanumDriveIMU extends LinearOpMode {
         double spin_p;
 
         waitForStart();
+        //reset the imu so old imu readings don't get in the way
             imu.resetYaw();
         while (opModeIsActive()) {
 
@@ -47,6 +49,7 @@ public class BasicMechanumDriveIMU extends LinearOpMode {
             spin_p = gamepad1.right_stick_x;
             right_p = gamepad1.left_stick_x;
 
+            //Gets current rotation relative to initial angle
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
             double frontRightPower = forward_p + spin_p + right_p;
