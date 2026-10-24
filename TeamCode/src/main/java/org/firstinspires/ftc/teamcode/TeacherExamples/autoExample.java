@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @Autonomous(name ="Auto Example", group = "examples")
 public class autoExample extends LinearOpMode {
+    // I state my variables up here so they are within the scope of all my methods
     DcMotor frontleft;
     DcMotor frontright;
     DcMotor backleft;
@@ -32,6 +33,7 @@ public class autoExample extends LinearOpMode {
     double yaw;
     double targetVel = 1680;
     boolean shooting = false;
+    // Creates new time variables
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime shooterTimer = new ElapsedTime();
 
@@ -73,6 +75,7 @@ public class autoExample extends LinearOpMode {
     }
     public void move(double y, double x, double targetAngle, double rotateSpeed, long time, double power) throws InterruptedException {
 
+        //The power changes the move speed of the robot so the time it takes for the robot to move is also increased
         time *= (1/power);
 
         heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
@@ -92,12 +95,17 @@ public class autoExample extends LinearOpMode {
         else {
             yaw = 0;
         }
-
+        /*
+        This is where I state all the variables for movement in an array like pattern for mechanum wheels.
+        Remember the forward and sideways movement are not controlled directly from the variables that can be
+        stated in the method, but in the field centric math.
+         */
         double frontLeftPower = axial - lateral + yaw * power;
         double frontRightPower = axial + lateral - yaw * power;
         double backLeftPower = axial + lateral + yaw * power;
         double backRightPower = axial - lateral - yaw * power;
 
+        //Makes sure power does not exceed 1 or -1
         double max;
         max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
         max = Math.max(max, Math.abs(backLeftPower));
@@ -115,6 +123,7 @@ public class autoExample extends LinearOpMode {
         backleft.setPower(backLeftPower);
         backright.setPower(backRightPower);
 
+        //Makes the wheels brake only when all motors have zero power
         if (frontRightPower == 0) {
             if (frontLeftPower == 0) {
                 if (backRightPower == 0) {
@@ -134,6 +143,7 @@ public class autoExample extends LinearOpMode {
             backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         }
 
+        //tells the robot how long to move
         sleep((long) time);
 
         frontleft.setPower(0);
@@ -142,6 +152,7 @@ public class autoExample extends LinearOpMode {
         backright.setPower(0);
     }
     public void intake(double time) {
+        //sets power to motors for a given amount of time
         intake.setPower(1);
         right_intake_servo.setPower(-1);
         left_intake_servo.setPower(1);
@@ -154,6 +165,7 @@ public class autoExample extends LinearOpMode {
     }
     public void shoot() {
 
+        //If you are confident enough, please fix this code. Possibly incorporate PID into this
         shooting = true;
         shooterTimer.reset();
 

@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 @Disabled
 @TeleOp(name = "Test", group = "LinearOpMode")
-public class Test extends LinearOpMode {
+public class TeleOpTest extends LinearOpMode {
 
     ElapsedTime Time = new ElapsedTime();
 

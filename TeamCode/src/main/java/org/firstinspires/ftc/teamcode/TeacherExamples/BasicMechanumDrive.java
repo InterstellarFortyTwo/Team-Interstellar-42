@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class BasicMechanumDrive extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
+        //This, in essence, is hardware mapping
         DcMotor frontleft = hardwareMap.get(DcMotor.class, "backleft");
         DcMotor frontright = hardwareMap.get(DcMotor.class, "backright");
         DcMotor backleft = hardwareMap.get(DcMotor.class, "backleft");

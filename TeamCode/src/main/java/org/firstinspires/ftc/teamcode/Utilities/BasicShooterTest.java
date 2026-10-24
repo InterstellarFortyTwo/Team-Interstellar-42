@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @Disabled
 @TeleOp(name = "ShooterTest", group = "LinearOpMode")
-public class ShooterTest extends LinearOpMode {
+public class BasicShooterTest extends LinearOpMode {
 
     boolean cycle = false;
     double launcher = 0.0;
