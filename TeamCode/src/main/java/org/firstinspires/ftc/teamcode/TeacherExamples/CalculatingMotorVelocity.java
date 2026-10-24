@@ -17,6 +17,7 @@ public class CalculatingMotorVelocity extends LinearOpMode {
             motor = hardwareMap.get(DcMotorEx.class, "motor_name");
             //This is just test code, the variables don't work for all motors.
             double ticksPerRev = 537.7;
+            //changes TPS to RPM
             double rpm = (motor.getVelocity() / ticksPerRev) * 60;
             double pulley_p;
             double launcher_p;
