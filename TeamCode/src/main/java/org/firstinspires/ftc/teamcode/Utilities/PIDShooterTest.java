@@ -35,16 +35,17 @@ public class PIDShooterTest extends LinearOpMode {
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         intake = hardwareMap.get(DcMotor.class, "intake");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         CRServo windmill = hardwareMap.get(CRServo.class, "windmill");
         windmill.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
         while (opModeIsActive()) {
             telemetry.addLine("right bumper & left bumper to increase or decrease target velocity");
-            if (gamepad1.right_bumper) {
+            if (gamepad1.rightBumperWasPressed()) {
                 targetVel += 10;
             }
-            if (gamepad1.left_bumper) {
+            if (gamepad1.leftBumperWasPressed()) {
                 targetVel -= 10;
             }
 
@@ -53,25 +54,25 @@ public class PIDShooterTest extends LinearOpMode {
                 stepIndex = (stepIndex +1) % stepSizes.length; //Modulo wraps the index back to 0
             }
 
-            if (gamepad1.dpad_left) {
+            if (gamepad1.dpadLeftWasPressed()) {
                 LaunchPID.setkP(LaunchPID.getkP() - stepSizes[stepIndex]);
             }
             telemetry.addLine("dpad right & dpad left to increase or decrease proportion");
-            if (gamepad1.dpad_right) {
+            if (gamepad1.dpadRightWasPressed()) {
                 LaunchPID.setkP(LaunchPID.getkP() + stepSizes[stepIndex]);
             }
             telemetry.addLine("dpad up & dpad down to increase or decrease dampening");
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpadUpWasPressed()) {
                 LaunchPID.setkD(LaunchPID.getkD() + stepSizes[stepIndex]);
             }
-            if (gamepad1.dpad_down) {
+            if (gamepad1.dpadDownWasPressed()) {
                 LaunchPID.setkD(LaunchPID.getkD() - stepSizes[stepIndex]);
             }
             telemetry.addLine("press X & Y to increase or decrease integral");
-            if (gamepad1.x) {
+            if (gamepad1.xWasPressed()) {
                 LaunchPID.setkI(LaunchPID.getkI() + stepSizes[stepIndex]);
             }
-            if (gamepad1.y) {
+            if (gamepad1.yWasPressed()) {
                 LaunchPID.setkI(LaunchPID.getkI() - stepSizes[stepIndex]);
             }
 
@@ -81,17 +82,16 @@ public class PIDShooterTest extends LinearOpMode {
 
             double flywheelVel = -flywheel.getVelocity();
 
-            if (gamepad1.a) {
-                isShooting = true;
-            }
-            else isShooting = false;
+            isShooting = gamepad1.aWasPressed();
 
             if(isShooting) {
                 flywheel.setPower(pid(f_kP, f_kI, f_kD, oldFlywheelVel, timeOld, targetVel - flywheelVel, runtime.milliseconds()));
             }
-            else flywheel.setPower(0);
+            else {
+                flywheel.setPower(0);
+            }
 
-            if (gamepad1.b) {
+            if (gamepad1.bWasPressed()) {
                 intake_power = 1;
             }
             else {
@@ -99,7 +99,7 @@ public class PIDShooterTest extends LinearOpMode {
             }
             intake.setPower(intake_power);
 
-            if (intake_power == 0 && targetVel - flywheelVel >= -1000 && targetVel - flywheelVel <= 1000) {
+            if (intake_power == 0 && targetVel - flywheelVel >= -10) {
                 windmill.setPower(1);
             }
             else {
