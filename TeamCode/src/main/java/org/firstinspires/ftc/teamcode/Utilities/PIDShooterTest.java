@@ -91,7 +91,7 @@ public class PIDShooterTest extends LinearOpMode {
                 flywheel.setPower(0);
             }
 
-            if (gamepad1.bWasPressed()) {
+            if (gamepad1.right_trigger_pressed) {
                 intake_power = 1;
             }
             else {
