@@ -4,9 +4,6 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -29,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class NathanOpMode extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
     ElapsedTime shootTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-    ElapsedTime intakeTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     boolean isShooting = false;
     double flywheelVel;
@@ -73,8 +69,6 @@ public class NathanOpMode extends LinearOpMode {
     CRServo left_intake_servo;
     CRServo windmill;
     IMU imu;
-    Limelight3A limelight;
-    OctoQuad octoQuad;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -92,11 +86,6 @@ public class NathanOpMode extends LinearOpMode {
         windmill = hardwareMap.get(CRServo.class, "windmill");
         right_intake_servo = hardwareMap.get(CRServo.class, "rightServo");
         left_intake_servo = hardwareMap.get(CRServo.class, "leftServo");
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-
-        limelight.setPollRateHz(90);
-        limelight.start();
-        limelight.pipelineSwitch(0);
 
         frontleft.setDirection(DcMotorSimple.Direction.FORWARD);
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
