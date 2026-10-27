@@ -33,6 +33,7 @@ public class NathanOpMode extends LinearOpMode {
     double oldFlywheelDist = 0;
     double oldTime = 0;
     double flywheel_p;
+    double oldFlywheelVel;
     double ballsShot;
     double artifact = 0;
     boolean isIntakeRunning = true;
@@ -41,7 +42,7 @@ public class NathanOpMode extends LinearOpMode {
 
     double r_integralSum;
     double f_integralSum;
-    public static double f_kD = 0.01, f_kI = 0, f_kP = 0.05;
+    public static double f_kD = 0.02, f_kI = 0, f_kP = 0.05;
 
     double frontLeftPower;
     double frontRightPower;
@@ -54,7 +55,6 @@ public class NathanOpMode extends LinearOpMode {
     boolean fieldToggle;
     double y;
     double x;
-    double rot;
     double rotCheck;
     double heading;
     double moveSpeed;
@@ -137,18 +137,14 @@ public class NathanOpMode extends LinearOpMode {
             flywheelVel = flywheel.getVelocity();
             y = gamepad1.left_stick_y;
             x = gamepad1.left_stick_x;
-            if (isShooting) {
-                yaw = rot;
-            } else {
-                yaw = gamepad1.right_stick_x;
-                rotCheck = gamepad1.right_stick_x;
-            }
+            yaw = gamepad1.right_stick_x;
+            rotCheck = gamepad1.right_stick_x;
 
 
             //------------------------------------Movement----------------------------------------
 
 
-            telemetry.addLine("Press Left Stick to change move speed");
+            telemetry.addLine("Press Left Stick or dpad down to change move speed");
             if (gamepad1.leftStickButtonWasPressed() || gamepad1.dpadDownWasPressed()) {
                 if (moveSpeed == 1) {
                     moveSpeed = 0.5;
@@ -157,10 +153,12 @@ public class NathanOpMode extends LinearOpMode {
                 }
             }
 
+            telemetry.addLine("Press dpad left to reset imu");
             if (gamepad1.dpad_left) {
                 imu.resetYaw();
             }
 
+            telemetry.addLine("Press dpad up to toggle field centric");
             if (gamepad1.dpad_up && !lastA) {
                 fieldToggle = !fieldToggle;
             }
@@ -176,18 +174,26 @@ public class NathanOpMode extends LinearOpMode {
                 telemetry.addLine("Field Centric Toggled: Off");
             }
 
-            if (0 - heading >= 5 && 0 - heading <= 5 && rotCheck > 0) {
-                yaw = (0 - heading) / 90;
+            telemetry.addLine("Press 'X' to toggle angle snapping");
+            if (gamepad1.xWasPressed()) {
+                if (0 - heading >= 5 && 0 - heading <= 5 && rotCheck > 0) {
+                    yaw = (0 - heading) / 90;
+                }
+                else if (90 - heading >= 5 && 90 - heading <= 5 && rotCheck > 0) {
+                    yaw = (90 - heading) / 90;
+                }
+                else if (-90 - heading >= 5 && -90 -heading <= 5 && rotCheck > 0) {
+                    yaw = (-90 - heading) / 90;
+                }
+                else if (180 - heading >= 5 && 180 - heading <= 5 && rotCheck > 0) {
+                    yaw = (180 - heading) / 90;
+                }
+            telemetry.addLine("Angle snapping: On");
             }
-            else if (90 - heading >= 5 && 90 - heading <= 5 && rotCheck > 0) {
-                yaw = (90 - heading) / 90;
+            else {
+                telemetry.addLine("Angle snapping: Off");
             }
-            else if (-90 - heading >= 5 && -90 -heading <= 5 && rotCheck > 0) {
-                yaw = (-90 - heading) / 90;
-            }
-            else if (180 - heading >= 5 && 180 - heading <= 5 && rotCheck > 0) {
-                yaw = (180 - heading) / 90;
-            }
+
 
             frontRightPower = (axial + yaw + lateral) * moveSpeed;
             frontLeftPower = (axial - yaw - lateral) * moveSpeed;
@@ -215,6 +221,7 @@ public class NathanOpMode extends LinearOpMode {
             //-----------------------------------Shooting---------------------------------------
 
 
+            telemetry.addLine("Press right and left bumper to increase or decrease target flywheel velocity");
             if (gamepad1.rightBumperWasPressed()) {
                 targetFlywheelVel += 10;
             }
@@ -222,6 +229,7 @@ public class NathanOpMode extends LinearOpMode {
                 targetFlywheelVel -= 10;
             }
 
+            telemetry.addLine("Press 'A' to shoot");
             if (gamepad1.a && !lastB) {
                 isShooting = !isShooting;
             }
@@ -231,7 +239,7 @@ public class NathanOpMode extends LinearOpMode {
 
                 shootTimer.reset();
 
-                flywheel.setPower(pid(f_kP, f_kI, f_kD, oldFlywheelDist, oldTime, targetFlywheelVel - flywheelVel, runtime.milliseconds(), "f"));
+                flywheel.setPower(pid(f_kP, f_kI, f_kD, oldFlywheelDist, oldTime, targetFlywheelVel - flywheelVel, runtime.milliseconds()));
 
                 if (targetFlywheelVel - flywheelVel >= -150 && targetFlywheelVel - flywheelVel <= 150) {
                     windmill.setPower(1);
@@ -245,7 +253,7 @@ public class NathanOpMode extends LinearOpMode {
                 ballsShot = 0;
             }
 
-            if ((targetFlywheelVel - oldFlywheelDist) / (runtime.milliseconds() - oldTime) < -5) {
+            if ((flywheelVel - oldFlywheelDist) / (runtime.milliseconds() - oldTime) < -5) {
                 ballsShot += 1;
             }
             if (ballsShot >= 4) {
@@ -254,14 +262,15 @@ public class NathanOpMode extends LinearOpMode {
 
             flywheel.setPower(flywheel_p);
 
-            oldTime = runtime.milliseconds();
             oldFlywheelDist = targetFlywheelVel - flywheelVel;
+            oldFlywheelVel = flywheelVel;
 
 
             //-------------------------------intake--------------------------------
 
 
-            if (gamepad1.b && isIntakeRunning) {
+            telemetry.addLine("Press 'B' to power intake");
+            if (gamepad1.bWasPressed() && isIntakeRunning) {
                 left_intake_servo.setPower(1);
                 right_intake_servo.setPower(1);
                 intake.setPower(1);
@@ -282,26 +291,28 @@ public class NathanOpMode extends LinearOpMode {
                 artifact = 0;
             }
 
+            oldTime = runtime.milliseconds();
+            oldintake = intakeVel;
+
 
             //---------------------telemetry--------------------
-
+            telemetry.addData("Movement speed: ", moveSpeed);
+            telemetry.addData("Current rotation: ", heading);
+            telemetry.addData("Target flywheel velocity: ", targetFlywheelVel);
+            telemetry.addData("Current flywheel velocity: ", flywheelVel);
+            telemetry.addData("Current amount of balls: ", artifact);
+            telemetry.addData("Run time", runtime);
+            telemetry.update();
         }
     }
-    public double pid(double proportion, double integral, double dampening, double distOld, double tOld, double distNew, double tNew, String letterCode){
+    public double pid(double proportion, double integral, double dampening, double distOld, double tOld, double distNew, double tNew){
 
         double p = distNew * proportion;
 
         double i = 0;
 
-        if(letterCode == "r"){
-            r_integralSum += (tNew-tOld)*((distOld+distNew)/2);
-            i = r_integralSum * integral;
-        }
-        else if(letterCode == "f"){
-            f_integralSum += (tNew-tOld)*((distOld+distNew)/2);
-            i = f_integralSum * integral;
-        }
-
+        f_integralSum += (tNew-tOld)*((distOld+distNew)/2);
+        i = f_integralSum * integral;
 
         double vel = (distNew - distOld)/(tNew - tOld);
         double d = -vel * dampening;
