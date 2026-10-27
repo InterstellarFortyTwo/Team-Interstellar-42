@@ -16,10 +16,6 @@ import com.qualcomm.robotcore.hardware.ImuOrientationOnRobot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-import org.firstinspires.ftc.teamcode.hardwareCode.PIDConfig;
-
-import java.util.concurrent.TimeUnit;
 
 @TeleOp(name = "TeleOp Rough Draft")
 @Config
@@ -40,7 +36,6 @@ public class NathanOpMode extends LinearOpMode {
     double oldintake = 0;
     boolean lastB = false;
 
-    double r_integralSum;
     double f_integralSum;
     public static double f_kD = 0.02, f_kI = 0, f_kP = 0.05;
 
