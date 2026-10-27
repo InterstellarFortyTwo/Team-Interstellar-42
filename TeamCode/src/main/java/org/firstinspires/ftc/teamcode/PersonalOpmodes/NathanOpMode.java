@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class NathanOpMode extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
     ElapsedTime shootTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-    ElapsedTime intakeTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     boolean isShooting = false;
     double flywheelVel;
