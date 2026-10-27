@@ -102,7 +102,7 @@ public class PIDRotTest extends LinearOpMode {
 
             double heading = imu.getRobotYawPitchRollAngles().getYaw();
 
-            if (gamepad1.aWasPressed()) {
+            if (gamepad1.a) {
                 yaw = pid(r_kP, r_kI, r_kD, oldAngle, timeOld, targetAngle - heading, runtime.milliseconds());
             }
             else {

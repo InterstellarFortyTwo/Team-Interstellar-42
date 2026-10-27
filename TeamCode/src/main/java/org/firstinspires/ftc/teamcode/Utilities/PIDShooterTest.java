@@ -17,7 +17,7 @@ public class PIDShooterTest extends LinearOpMode {
     double[] stepSizes = {0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001};
     //Index to select the current step size from the array
     int stepIndex = 2;
-    public static double f_kD = 0.002, f_kI = 0.0, f_kP = 0.05;
+    public static double f_kD = 0.01, f_kI = 0.0, f_kP = 0.05;
     PIDConfig LaunchPID = new PIDConfig(f_kP, f_kI, f_kD);
     DcMotorEx flywheel;
     DcMotor intake;
@@ -82,7 +82,7 @@ public class PIDShooterTest extends LinearOpMode {
 
             double flywheelVel = -flywheel.getVelocity();
 
-            isShooting = gamepad1.aWasPressed();
+            isShooting = gamepad1.a;
 
             if(isShooting) {
                 flywheel.setPower(pid(f_kP, f_kI, f_kD, oldFlywheelVel, timeOld, targetVel - flywheelVel, runtime.milliseconds()));
@@ -99,7 +99,7 @@ public class PIDShooterTest extends LinearOpMode {
             }
             intake.setPower(intake_power);
 
-            if (intake_power == 0 && targetVel - flywheelVel >= -10) {
+            if (intake_power == 0 && targetVel - flywheelVel >= -150 && targetVel - flywheelVel <= 150) {
                 windmill.setPower(1);
             }
             else {

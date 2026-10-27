@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.PersonalOpmodes;
 
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
@@ -72,7 +72,7 @@ public class CamdenOpMode extends LinearOpMode {
             telemetry.addLine("dpad down resets yaw value");
             telemetry.addLine("dpad right toggles rotation lock");
             telemetry.addLine("dpad left resets strafe distance");
-            if (intakeOn = true) {
+            if (intakeOn) {
                 intake.setPower(1.0);
             }
             else {
