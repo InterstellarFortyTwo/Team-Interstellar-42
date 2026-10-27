@@ -3,44 +3,121 @@ package org.firstinspires.ftc.teamcode.PersonalOpmodes;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.ImuOrientationOnRobot;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-//This is my personal code. If you want to use this code, please rename it.
-@Disabled
-@TeleOp(name = "Nathan's OpMode", group = "LinearOpMode")
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
+import org.firstinspires.ftc.teamcode.hardwareCode.PIDConfig;
+
+import java.util.concurrent.TimeUnit;
+
+@TeleOp(name = "TeleOp Rough Draft")
+@Config
 public class NathanOpMode extends LinearOpMode {
+    ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    ElapsedTime shootTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    ElapsedTime intakeTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
+    boolean isShooting = false;
+    double flywheelVel;
+    double targetFlywheelVel = 1240;
+    double oldFlywheelDist = 0;
+    double oldTime = 0;
+    double flywheel_p;
+    double ballsShot;
+    double artifact = 0;
+    boolean isIntakeRunning = true;
+    double oldintake = 0;
+    boolean lastB = false;
+
+    double r_integralSum;
+    double f_integralSum;
+    public static double f_kD = 0.01, f_kI = 0, f_kP = 0.05;
+
+    double frontLeftPower;
+    double frontRightPower;
+    double backRightPower;
+    double backLeftPower;
+    double yaw;
+    double axial;
+    double lateral;
+    boolean lastA;
+    boolean fieldToggle;
+    double y;
+    double x;
+    double rot;
+    double rotCheck;
+    double heading;
+    double moveSpeed;
+
+    DcMotor frontleft;
+    DcMotor backleft;
+    DcMotor frontright;
+    DcMotor backright;
+    DcMotorEx flywheel;
+    DcMotorEx intake;
+    CRServo right_intake_servo;
+    CRServo left_intake_servo;
+    CRServo windmill;
+    IMU imu;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
-        DcMotor FRONT_L = hardwareMap.get(DcMotor.class, "frontleft");
-        DcMotor FRONT_R = hardwareMap.get(DcMotor.class, "frontright");
-        DcMotor BACK_L = hardwareMap.get(DcMotor.class, "backleft");
-        DcMotor BACK_R = hardwareMap.get(DcMotor.class, "backright");
-        DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+        frontleft = hardwareMap.get(DcMotor.class, "frontleft");
+        frontright = hardwareMap.get(DcMotor.class, "frontright");
+        backleft = hardwareMap.get(DcMotor.class, "backleft");
+        backright = hardwareMap.get(DcMotor.class, "backright");
+        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        CRServo right_launch_servo = hardwareMap.get(CRServo.class, "rightServo");
-        CRServo left_launch_servo = hardwareMap.get(CRServo.class, "leftServo");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        windmill = hardwareMap.get(CRServo.class, "windmill");
+        right_intake_servo = hardwareMap.get(CRServo.class, "rightServo");
+        left_intake_servo = hardwareMap.get(CRServo.class, "leftServo");
 
-
-        FRONT_L.setDirection(DcMotorSimple.Direction.FORWARD);
-        FRONT_R.setDirection(DcMotorSimple.Direction.REVERSE);
-        BACK_L.setDirection(DcMotorSimple.Direction.FORWARD);
-        BACK_R.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontleft.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontright.setDirection(DcMotorSimple.Direction.REVERSE);
+        backleft.setDirection(DcMotorSimple.Direction.FORWARD);
+        backright.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setDirection(DcMotorSimple.Direction.FORWARD);
         flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
+        windmill.setDirection(DcMotorSimple.Direction.FORWARD);
+        right_intake_servo.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_intake_servo.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        IMU imu = hardwareMap.get(IMU.class, "imu");
+        if (frontRightPower == 0) {
+            if (frontLeftPower == 0) {
+                if (backRightPower == 0) {
+                    if (backLeftPower == 0) {
+                        frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    }
+                }
+            }
+        }
+        else {
+            frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
+
+        imu = hardwareMap.get(IMU.class, "imu");
 
         ImuOrientationOnRobot orientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
@@ -49,108 +126,74 @@ public class NathanOpMode extends LinearOpMode {
         IMU.Parameters parameters = new IMU.Parameters(orientation);
         imu.initialize(parameters);
 
-        double heading = 0;
-        double x;
-        double y;
+        telemetry.addData("Status", "IMU Calibrating...");
+        telemetry.update();
 
-        boolean cycle = false;
-        boolean lastA = false;
-        boolean lastB = false;
-        boolean yawReset = false;
-        boolean fieldToggle = false;
-        double launcher = 0.0;
-
-        double forward_p;
-        double right_p;
-        double spin_p;
-
-        waitForStart();
         imu.resetYaw();
+        waitForStart();
+        runtime.reset();
         while (opModeIsActive()) {
-            telemetry.addLine("dpad up toggles field centric drive");
-            telemetry.addLine("dpad down resets yaw value");
-            telemetry.addLine("dpad right toggles rotation lock");
-            telemetry.addLine("dpad left resets strafe distance");
 
+            heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            flywheelVel = flywheel.getVelocity();
             y = gamepad1.left_stick_y;
             x = gamepad1.left_stick_x;
-            spin_p = gamepad1.right_stick_x;
+            if (isShooting) {
+                yaw = rot;
+            } else {
+                yaw = gamepad1.right_stick_x;
+                rotCheck = gamepad1.right_stick_x;
+            }
 
-            heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-            double flywheelVelocity = flywheel.getVelocity();
 
-            if(gamepad1.dpad_up && !lastA) {
+            //------------------------------------Movement----------------------------------------
+
+
+            telemetry.addLine("Press Left Stick to change move speed");
+            if (gamepad1.leftStickButtonWasPressed() || gamepad1.dpadDownWasPressed()) {
+                if (moveSpeed == 1) {
+                    moveSpeed = 0.5;
+                } else {
+                    moveSpeed = 1;
+                }
+            }
+
+            if (gamepad1.dpad_left) {
+                imu.resetYaw();
+            }
+
+            if (gamepad1.dpad_up && !lastA) {
                 fieldToggle = !fieldToggle;
             }
             lastA = gamepad1.dpad_up;
 
-            if(fieldToggle) {
-                forward_p = y*cos(-heading) - x * sin(-heading);
-                right_p = y *sin(-heading) + x*cos(-heading);
-            }
-            else {
-                forward_p = y;
-                right_p = x;
-            }
-            telemetry.addData("Field Centric Toggled:", fieldToggle);
-            telemetry.update();
-
-            if(gamepad1.dpad_down && !lastB) {
-                yawReset = !yawReset;
-            }
-            lastB = gamepad1.dpad_down;
-
-            if(yawReset) {
-                imu.resetYaw();
+            if (fieldToggle) {
+                axial = y * cos(-heading) - x * sin(-heading);
+                lateral = y * sin(-heading) + x * cos(-heading);
+                telemetry.addLine("Field Centric Toggled: On");
+            } else {
+                axial = y;
+                lateral = x;
+                telemetry.addLine("Field Centric Toggled: Off");
             }
 
-            if(gamepad1.a) {
-                if(flywheelVelocity <= 400) {
-                    right_launch_servo.setPower(0);
-                    left_launch_servo.setPower(0);
-                    launcher = 1.0;
-                    if(cycle) {
-                        cycle = !cycle;
-                    }
-                }
-                if(flywheelVelocity >= 400 && flywheelVelocity < 500) {
-                    if(cycle) {
-                        launcher = 0.0;
-                        right_launch_servo.setPower(0);
-                        left_launch_servo.setPower(0);
-                    }
-                    else {
-                        launcher = 0.3;
-                        right_launch_servo.setPower(-1);
-                        left_launch_servo.setPower(1);
-                    }
-                }
-                if(flywheelVelocity > 500) {
-                    launcher = -1.0;
-                    right_launch_servo.setPower(0);
-                    left_launch_servo.setPower(0);
-                    cycle = !cycle;
-                    sleep(500);
-                }
+            if (0 - heading >= 5 && 0 - heading <= 5 && rotCheck > 0) {
+                yaw = (0 - heading) / 90;
             }
-            else {
-                launcher = 0.0;
-                right_launch_servo.setPower(0);
-                left_launch_servo.setPower(0);
+            else if (90 - heading >= 5 && 90 - heading <= 5 && rotCheck > 0) {
+                yaw = (90 - heading) / 90;
+            }
+            else if (-90 - heading >= 5 && -90 -heading <= 5 && rotCheck > 0) {
+                yaw = (-90 - heading) / 90;
+            }
+            else if (180 - heading >= 5 && 180 - heading <= 5 && rotCheck > 0) {
+                yaw = (180 - heading) / 90;
             }
 
-
-            double frontRightPower = forward_p + spin_p + right_p;
-            double frontLeftPower = forward_p - spin_p - right_p;
-            double backRightPower = forward_p + spin_p - right_p;
-            double backLeftPower = forward_p - spin_p + right_p;
-
-            if (frontRightPower <= 0 && frontRightPower >= 0 && frontLeftPower <= 0 && frontLeftPower >= 0 && backLeftPower <= 0 && backLeftPower >= 0 && backRightPower <= 0 && backRightPower >= 0) {
-                FRONT_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                FRONT_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                BACK_L.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                BACK_R.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
+            frontRightPower = (axial + yaw + lateral) * moveSpeed;
+            frontLeftPower = (axial - yaw - lateral) * moveSpeed;
+            backRightPower = (axial + yaw - lateral) * moveSpeed;
+            backLeftPower = (axial - yaw + lateral) * moveSpeed;
 
             double max;
             max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
@@ -164,16 +207,107 @@ public class NathanOpMode extends LinearOpMode {
                 backRightPower /= max;
             }
 
-            FRONT_R.setPower(frontRightPower);
-            FRONT_L.setPower(frontLeftPower);
-            BACK_R.setPower(backRightPower);
-            BACK_L.setPower(backLeftPower);
-            flywheel.setPower(launcher);
+            frontleft.setPower(frontLeftPower);
+            frontright.setPower(frontRightPower);
+            backleft.setPower(backLeftPower);
+            backright.setPower(backRightPower);
 
-            telemetry.addData("Front Wheel Power Right/Left", "%4.2f, %4.2f", frontRightPower, frontLeftPower);
-            telemetry.addData("Back Wheel Power Right/Left", "%4.2f, %4.2f", backRightPower, backLeftPower);
-            telemetry.addData("Current Rotation (Degrees)", "%.2f", heading);
-            telemetry.update();
+
+            //-----------------------------------Shooting---------------------------------------
+
+
+            if (gamepad1.rightBumperWasPressed()) {
+                targetFlywheelVel += 10;
+            }
+            if (gamepad1.leftBumperWasPressed()) {
+                targetFlywheelVel -= 10;
+            }
+
+            if (gamepad1.a && !lastB) {
+                isShooting = !isShooting;
+            }
+            lastB = gamepad1.a;
+
+            if(isShooting) {
+
+                shootTimer.reset();
+
+                flywheel.setPower(pid(f_kP, f_kI, f_kD, oldFlywheelDist, oldTime, targetFlywheelVel - flywheelVel, runtime.milliseconds(), "f"));
+
+                if (targetFlywheelVel - flywheelVel >= -150 && targetFlywheelVel - flywheelVel <= 150) {
+                    windmill.setPower(1);
+                }
+                else {
+                    windmill.setPower(0);
+                }
+            }
+            else {
+                flywheel.setPower(0);
+                ballsShot = 0;
+            }
+
+            if ((targetFlywheelVel - oldFlywheelDist) / (runtime.milliseconds() - oldTime) < -5) {
+                ballsShot += 1;
+            }
+            if (ballsShot >= 4) {
+                isShooting = false;
+            }
+
+            flywheel.setPower(flywheel_p);
+
+            oldTime = runtime.milliseconds();
+            oldFlywheelDist = targetFlywheelVel - flywheelVel;
+
+
+            //-------------------------------intake--------------------------------
+
+
+            if (gamepad1.b && isIntakeRunning) {
+                left_intake_servo.setPower(1);
+                right_intake_servo.setPower(1);
+                intake.setPower(1);
+            }
+            else {
+                left_intake_servo.setPower(0);
+                right_intake_servo.setPower(0);
+                intake.setPower(0);
+            }
+            double intakeVel = intake.getVelocity();
+
+            if ((intakeVel - oldintake) / (runtime.milliseconds() - oldTime) <= -5) {
+                artifact += 1;
+            }
+
+            isIntakeRunning = !(artifact >= 4);
+            if (isShooting) {
+                artifact = 0;
+            }
+
+
+            //---------------------telemetry--------------------
+
         }
     }
+    public double pid(double proportion, double integral, double dampening, double distOld, double tOld, double distNew, double tNew, String letterCode){
+
+        double p = distNew * proportion;
+
+        double i = 0;
+
+        if(letterCode == "r"){
+            r_integralSum += (tNew-tOld)*((distOld+distNew)/2);
+            i = r_integralSum * integral;
+        }
+        else if(letterCode == "f"){
+            f_integralSum += (tNew-tOld)*((distOld+distNew)/2);
+            i = f_integralSum * integral;
+        }
+
+
+        double vel = (distNew - distOld)/(tNew - tOld);
+        double d = -vel * dampening;
+
+        return p + i + d;
+    }
 }
+
