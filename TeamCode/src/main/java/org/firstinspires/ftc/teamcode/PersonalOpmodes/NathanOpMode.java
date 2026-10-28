@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name = "TeleOp Rough Draft")
+@TeleOp(name = "NathanOpMode")
 @Config
 public class NathanOpMode extends LinearOpMode {
     ElapsedTime runtime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
@@ -52,7 +52,7 @@ public class NathanOpMode extends LinearOpMode {
     double x;
     double rotCheck;
     double heading;
-    double moveSpeed;
+    double moveSpeed = 1;
 
     DcMotor frontleft;
     DcMotor backleft;
@@ -87,8 +87,8 @@ public class NathanOpMode extends LinearOpMode {
         backleft.setDirection(DcMotorSimple.Direction.FORWARD);
         backright.setDirection(DcMotorSimple.Direction.REVERSE);
         intake.setDirection(DcMotorSimple.Direction.FORWARD);
-        flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
-        windmill.setDirection(DcMotorSimple.Direction.FORWARD);
+        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        windmill.setDirection(DcMotorSimple.Direction.REVERSE);
         right_intake_servo.setDirection(DcMotorSimple.Direction.FORWARD);
         left_intake_servo.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -119,9 +119,6 @@ public class NathanOpMode extends LinearOpMode {
 
         IMU.Parameters parameters = new IMU.Parameters(orientation);
         imu.initialize(parameters);
-
-        telemetry.addData("Status", "IMU Calibrating...");
-        telemetry.update();
 
         imu.resetYaw();
         waitForStart();
@@ -236,7 +233,7 @@ public class NathanOpMode extends LinearOpMode {
 
                 flywheel.setPower(pid(f_kP, f_kI, f_kD, oldFlywheelDist, oldTime, targetFlywheelVel - flywheelVel, runtime.milliseconds()));
 
-                if (targetFlywheelVel - flywheelVel >= -50 && targetFlywheelVel - flywheelVel <= 50) {
+                if (targetFlywheelVel - flywheelVel >= -100 && targetFlywheelVel - flywheelVel <= 100) {
                     windmill.setPower(1);
                 }
                 else {
@@ -246,6 +243,7 @@ public class NathanOpMode extends LinearOpMode {
             else {
                 flywheel.setPower(0);
                 ballsShot = 0;
+                windmill.setPower(0);
             }
 
             if ((flywheelVel - oldFlywheelVel) / (runtime.milliseconds() - oldTime) < -5) {
@@ -255,8 +253,7 @@ public class NathanOpMode extends LinearOpMode {
                 isShooting = false;
             }
 
-            flywheel.setPower(flywheel_p);
-
+            oldTime = runtime.milliseconds();
             oldFlywheelDist = targetFlywheelVel - flywheelVel;
             oldFlywheelVel = flywheelVel;
 
@@ -265,7 +262,7 @@ public class NathanOpMode extends LinearOpMode {
 
 
             telemetry.addLine("Press 'B' to power intake");
-            if (gamepad1.bWasPressed() && isIntakeRunning) {
+            if (gamepad1.b && isIntakeRunning) {
                 left_intake_servo.setPower(1);
                 right_intake_servo.setPower(1);
                 intake.setPower(1);
@@ -286,7 +283,6 @@ public class NathanOpMode extends LinearOpMode {
                 artifact = 0;
             }
 
-            oldTime = runtime.milliseconds();
             oldintake = intakeVel;
 
 
