@@ -129,7 +129,7 @@ public class NathanOpMode extends LinearOpMode {
         while (opModeIsActive()) {
 
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            flywheelVel = flywheel.getVelocity();
+            flywheelVel = -flywheel.getVelocity();
             y = gamepad1.left_stick_y;
             x = gamepad1.left_stick_x;
             yaw = gamepad1.right_stick_x;
@@ -172,16 +172,16 @@ public class NathanOpMode extends LinearOpMode {
             telemetry.addLine("Press 'X' to toggle angle snapping");
             if (gamepad1.xWasPressed()) {
                 if (0 - heading >= 5 && 0 - heading <= 5 && rotCheck > 0) {
-                    yaw = (0 - heading) / 90;
+                    yaw = (0 - heading) / 10;
                 }
                 else if (90 - heading >= 5 && 90 - heading <= 5 && rotCheck > 0) {
-                    yaw = (90 - heading) / 90;
+                    yaw = (90 - heading) / 10;
                 }
                 else if (-90 - heading >= 5 && -90 -heading <= 5 && rotCheck > 0) {
-                    yaw = (-90 - heading) / 90;
+                    yaw = (-90 - heading) / 10;
                 }
                 else if (180 - heading >= 5 && 180 - heading <= 5 && rotCheck > 0) {
-                    yaw = (180 - heading) / 90;
+                    yaw = (180 - heading) / 10;
                 }
             telemetry.addLine("Angle snapping: On");
             }
@@ -236,7 +236,7 @@ public class NathanOpMode extends LinearOpMode {
 
                 flywheel.setPower(pid(f_kP, f_kI, f_kD, oldFlywheelDist, oldTime, targetFlywheelVel - flywheelVel, runtime.milliseconds()));
 
-                if (targetFlywheelVel - flywheelVel >= -150 && targetFlywheelVel - flywheelVel <= 150) {
+                if (targetFlywheelVel - flywheelVel >= -50 && targetFlywheelVel - flywheelVel <= 50) {
                     windmill.setPower(1);
                 }
                 else {
@@ -248,7 +248,7 @@ public class NathanOpMode extends LinearOpMode {
                 ballsShot = 0;
             }
 
-            if ((flywheelVel - oldFlywheelDist) / (runtime.milliseconds() - oldTime) < -5) {
+            if ((flywheelVel - oldFlywheelVel) / (runtime.milliseconds() - oldTime) < -5) {
                 ballsShot += 1;
             }
             if (ballsShot >= 4) {
