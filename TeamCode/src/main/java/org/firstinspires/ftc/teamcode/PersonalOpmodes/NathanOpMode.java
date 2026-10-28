@@ -28,13 +28,16 @@ public class NathanOpMode extends LinearOpMode {
     double targetFlywheelVel = 1240;
     double oldFlywheelDist = 0;
     double oldTime = 0;
-    double flywheel_p;
     double oldFlywheelVel;
     double ballsShot;
     double artifact = 0;
     boolean isIntakeRunning = true;
     double oldintake = 0;
     boolean lastB = false;
+    boolean lastC = false;
+    boolean angleSnapping = false;
+    boolean lastD = false;
+    boolean intakeIsOn;
 
     double f_integralSum;
     public static double f_kD = 0.02, f_kI = 0, f_kP = 0.05;
@@ -125,7 +128,7 @@ public class NathanOpMode extends LinearOpMode {
         runtime.reset();
         while (opModeIsActive()) {
 
-            heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             flywheelVel = -flywheel.getVelocity();
             y = gamepad1.left_stick_y;
             x = gamepad1.left_stick_x;
@@ -167,8 +170,13 @@ public class NathanOpMode extends LinearOpMode {
             }
 
             telemetry.addLine("Press 'X' to toggle angle snapping");
-            if (gamepad1.xWasPressed()) {
-                if (0 - heading >= 5 && 0 - heading <= 5 && rotCheck > 0) {
+            if (gamepad1.x && !lastC) {
+                angleSnapping = !angleSnapping;
+            }
+            lastC = gamepad1.x;
+
+            if (angleSnapping) {
+                    if (0 - heading >= 5 && 0 - heading <= 5 && rotCheck > 0) {
                     yaw = (0 - heading) / 10;
                 }
                 else if (90 - heading >= 5 && 90 - heading <= 5 && rotCheck > 0) {
@@ -261,8 +269,12 @@ public class NathanOpMode extends LinearOpMode {
             //-------------------------------intake--------------------------------
 
 
-            telemetry.addLine("Press 'B' to power intake");
-            if (gamepad1.b && isIntakeRunning) {
+            if (gamepad1.b && !lastD && isIntakeRunning) {
+            intakeIsOn = !intakeIsOn;
+            }
+            lastD = gamepad1.b;
+
+            if (intakeIsOn) {
                 left_intake_servo.setPower(1);
                 right_intake_servo.setPower(1);
                 intake.setPower(1);
