@@ -40,7 +40,7 @@ public class NathanOpMode extends LinearOpMode {
     boolean intakeIsOn;
 
     double f_integralSum;
-    public static double f_kD = 0.02, f_kI = 0, f_kP = 0.05;
+    public static double f_kD = 0.02, f_kI = 0, f_kP = 0.04;
 
     double frontLeftPower;
     double frontRightPower;
@@ -257,7 +257,7 @@ public class NathanOpMode extends LinearOpMode {
             if ((flywheelVel - oldFlywheelVel) / (runtime.milliseconds() - oldTime) < -5) {
                 ballsShot += 1;
             }
-            if (ballsShot >= 4) {
+            if (ballsShot >= artifact) {
                 isShooting = false;
             }
 
@@ -286,14 +286,14 @@ public class NathanOpMode extends LinearOpMode {
             }
             double intakeVel = intake.getVelocity();
 
-            if ((intakeVel - oldintake) / (runtime.milliseconds() - oldTime) <= -5) {
+            if ((intakeVel - oldintake) / (runtime.milliseconds() - oldTime) <= 0) {
                 artifact += 1;
+            }
+            else if (isShooting) {
+                artifact = 0;
             }
 
             isIntakeRunning = !(artifact >= 4);
-            if (isShooting) {
-                artifact = 0;
-            }
 
             oldintake = intakeVel;
 
