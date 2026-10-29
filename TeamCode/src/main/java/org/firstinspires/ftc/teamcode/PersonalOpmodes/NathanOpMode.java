@@ -129,6 +129,7 @@ public class NathanOpMode extends LinearOpMode {
         while (opModeIsActive()) {
 
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            double Degrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             flywheelVel = -flywheel.getVelocity();
             y = gamepad1.left_stick_y;
             x = gamepad1.left_stick_x;
@@ -300,7 +301,7 @@ public class NathanOpMode extends LinearOpMode {
 
             //---------------------telemetry--------------------
             telemetry.addData("Movement speed: ", moveSpeed);
-            telemetry.addData("Current rotation: ", heading);
+            telemetry.addData("Current rotation: ", Degrees);
             telemetry.addData("Target flywheel velocity: ", targetFlywheelVel);
             telemetry.addData("Current flywheel velocity: ", flywheelVel);
             telemetry.addData("Current amount of balls: ", artifact);

@@ -78,6 +78,7 @@ public class NathanAuto extends LinearOpMode {
         time *= (1/power);
 
         heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double Degrees = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         /*
         I'm using field centric drive to allow more movements while making it fairly simple.
         This allows us to turn while we are moving.
@@ -85,14 +86,17 @@ public class NathanAuto extends LinearOpMode {
         double axial = y * cos(-heading) - x * sin(-heading);
         double lateral = y * sin(-heading) + x * cos(-heading);
 
-        double error = targetAngle - heading;
+        double error = targetAngle - Degrees;
         if (targetAngle != 0) {
-            while (heading != targetAngle) {
+            if (Degrees != targetAngle) {
                 yaw = rotateSpeed * error / targetAngle;
+            }
+            else {
+                yaw = 0;
             }
         }
         else {
-            yaw = 0;
+            yaw = error / 90;
         }
         /*
         This is where I state all the variables for movement in an array like pattern for mechanum wheels.
