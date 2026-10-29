@@ -47,8 +47,8 @@ public class NathanAuto extends LinearOpMode {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         windmill = hardwareMap.get(CRServo.class, "windmill");
-        right_intake_servo = hardwareMap.get(CRServo.class, "rightservo");
-        left_intake_servo = hardwareMap.get(CRServo.class, "leftservo");
+        right_intake_servo = hardwareMap.get(CRServo.class, "rightServo");
+        left_intake_servo = hardwareMap.get(CRServo.class, "leftServo");
         imu = hardwareMap.get(IMU.class, "imu");
 
         frontleft.setDirection(DcMotorSimple.Direction.REVERSE);
