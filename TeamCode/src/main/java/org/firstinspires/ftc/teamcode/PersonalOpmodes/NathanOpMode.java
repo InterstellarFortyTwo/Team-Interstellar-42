@@ -177,16 +177,16 @@ public class NathanOpMode extends LinearOpMode {
             lastC = gamepad1.x;
 
             if (angleSnapping) {
-                    if (0 - Degrees >= 5 && 0 - Degrees <= 5 && rotCheck > 0) {
+                    if (0 - Degrees >= 5 && 0 - Degrees <= 5 && rotCheck != 0) {
                     yaw = (0 - Degrees) / 10;
                 }
-                else if (90 - Degrees >= 5 && 90 - Degrees <= 5 && rotCheck > 0) {
+                else if (90 - Degrees >= 5 && 90 - Degrees <= 5 && rotCheck != 0) {
                     yaw = (90 - Degrees) / 10;
                 }
-                else if (-90 - Degrees >= 5 && -90 - Degrees <= 5 && rotCheck > 0) {
+                else if (-90 - Degrees >= 5 && -90 - Degrees <= 5 && rotCheck != 0) {
                     yaw = (-90 - Degrees) / 10;
                 }
-                else if (180 - Degrees >= 5 && 180 - Degrees <= 5 && rotCheck > 0) {
+                else if (180 - Degrees >= 5 && 180 - Degrees <= 5 && rotCheck != 0) {
                     yaw = (180 - Degrees) / 10;
                 }
             telemetry.addLine("Angle snapping: On");
