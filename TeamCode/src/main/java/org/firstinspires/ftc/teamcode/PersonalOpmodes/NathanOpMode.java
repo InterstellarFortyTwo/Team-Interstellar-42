@@ -249,7 +249,7 @@ public class NathanOpMode extends LinearOpMode {
                 }
             }
             else {
-                flywheel.setPower(0);
+                flywheel.setVelocity(targetFlywheelVel);
                 ballsShot = 0;
                 windmill.setPower(0);
             }
